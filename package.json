@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mannyyang/cypressautomocker.git"
+    "url": "git+https://github.com/mannyyang/cypress-automocker.git"
   },
   "keywords": [
     "cypress.io",
     "mock"
   ],
-  "author": "Scott Schafer and Alexander Polatnick",
+  "author": "Scott Schafer and Alexander Polatnick and Manuel Yang",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/scottschafer/cypressautomocker/issues"
+    "url": "https://github.com/mannyyang/cypress-automocker/issues"
   },
-  "homepage": "https://github.com/scottschafer/cypressautomocker#readme"
+  "homepage": "https://github.com/mannyyang/cypress-automocker#readme"
 }

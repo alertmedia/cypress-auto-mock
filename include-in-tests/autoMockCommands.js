@@ -27,11 +27,10 @@ function registerAutoMockCommands() {
   let automocker = null;
 
   Cypress.Commands.add('automock', (sessionName, options) => {
-
     const automockRecord = Cypress.config().automocker ? (Cypress.config().automocker.record !== false) : true;
     const automockPlayback = Cypress.config().automocker ? (Cypress.config().automocker.playback !== false) : true;
-
-    const testDirPath = '/cypress/integration';
+    
+    // Merge default options with the ones provided
     options = setOptions(options);
 
     // determine the mock file name
@@ -39,14 +38,13 @@ function registerAutoMockCommands() {
       sessionName += '.json';
     }
 
-    currentMockFileName = testDirPath + '/../automocks/' + sessionName;
-    //currentMockFileName = testDirPath + '/../../automocks/' + sessionName;
+    currentMockFileName = options.outDir + sessionName;
 
     // get the absolute path for recording purposes
     cy.exec('pwd', {
       log: false
     }).then(result => {
-      const absolutePathToMockFile = result.stdout + '/cypress/automocks/' + sessionName;
+      const absolutePathToMockFile = result.stdout + options.outDir + sessionName;
 
       // if the config allows us to replay the mock, test if it exists
       if (automockPlayback) {
@@ -272,6 +270,10 @@ function registerAutoMockCommands() {
     if (options.isCustomMock == undefined) {
       options.isCustomMock = false;
     }
+    if (options.outDir == undefined) {
+      options.ourDir = '/tests/e2e/mocks';
+    }
+
     currentOptions = options;
     return options;
   }

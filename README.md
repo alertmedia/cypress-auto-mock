@@ -1,4 +1,5 @@
-## cypressautomocker
+## cypress-automocker
+This is the fork of the cypress plugin "cypressautomocker". I wanted to add the ability to pass my own options for an out directory. Maybe I might make a pull request into original repo sometime.
 
 This tool is built on top of the open-source testing platform [Cypress.io](https://www.cypress.io/) to allow recording API results and replaying the APIs as a mock server.
 
@@ -62,10 +63,16 @@ registerAutoMockCommands();
 4. In each of your tests, add the following:
 
 ```
+  // The name of the JSON file that contains the recorded mock data.
   const MOCK_FILENAME = 'testCounter';
 
   before(() => {
-    cy.automock(MOCK_FILENAME);
+    // default options
+    let options = {
+      isCustomMock: false,
+      outDir: '/tests/e2e/mocks'
+    };
+    cy.automock(MOCK_FILENAME, {...options});
   });
 
   after(() => {
