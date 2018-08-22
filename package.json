@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/mannyyang/cypress-automocker/issues"
   },
-  "homepage": "https://github.com/mannyyang/cypress-automocker#readme"
+  "homepage": "https://github.com/mannyyang/cypress-automocker#readme",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  }
 }
