@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mannyyang/cypress-automocker.git"
+    "url": "git+https://github.com/mannyyang/cypress-auto-mock.git"
   },
   "keywords": [
     "cypress.io",
@@ -17,9 +17,9 @@
   "author": "Scott Schafer and Alexander Polatnick and Manuel Yang",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mannyyang/cypress-automocker/issues"
+    "url": "https://github.com/mannyyang/cypress-auto-mock/issues"
   },
-  "homepage": "https://github.com/mannyyang/cypress-automocker#readme",
+  "homepage": "https://github.com/mannyyang/cypress-auto-mock#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   }
