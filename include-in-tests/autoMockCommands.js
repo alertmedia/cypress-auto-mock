@@ -280,6 +280,9 @@ function registerAutoMockCommands() {
 
   function getApiKey(api) {
     let path = api.path;
+    if (api.query && api.method === "GET") {
+      path = path + "?" + api.query;
+    }
     if (api.url) {
       path = parseUri(api.url).path;
     }
