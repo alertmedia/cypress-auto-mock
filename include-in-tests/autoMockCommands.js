@@ -284,7 +284,11 @@ function registerAutoMockCommands() {
       path = path + "?" + api.query;
     }
     if (api.url) {
-      path = parseUri(api.url).path;
+      let uri = parseUri(api.url);
+      path = uri.path;
+      if (uri.query) {
+        path = path + "?" + uri.query;
+      }
     }
 
     return api.method + '.' + path;
