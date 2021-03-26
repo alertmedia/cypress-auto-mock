@@ -67,6 +67,7 @@ var Counter = function (_React$Component) {
     _this.state = {
       counter: 0,
       lastMessage: '',
+      lastResponseHeader: '',
       sw1: null,
       sw2: null
     };
@@ -162,6 +163,15 @@ var Counter = function (_React$Component) {
               onClick: this.onTestPostWithError.bind(this)
             },
             'Post, will return 402'
+          ),
+          _react2.default.createElement(
+            'button',
+            {
+              'data-test': 'button-test-head-with-responseBody',
+              type: 'button',
+              onClick: this.onTestHeadWithResponseBody.bind(this)
+            },
+            'Head, with return responseBody'
           )
         ),
         _react2.default.createElement(
@@ -173,6 +183,16 @@ var Counter = function (_React$Component) {
             { 'data-test': 'counter-label' },
             this.state.counter,
             ' '
+          )
+        ),
+        _react2.default.createElement(
+          'h3',
+          null,
+          'Response Header:',
+          _react2.default.createElement(
+            'span',
+            { 'data-text': 'response-header', id: 'response-header' },
+            this.state.lastResponseHeader
           )
         ),
         _react2.default.createElement(
@@ -275,6 +295,21 @@ var Counter = function (_React$Component) {
         self.setState({
           lastMessage: response.status + ', ' + response.responseText
         });
+      });
+    }
+  }, {
+    key: 'onTestHeadWithResponseBody',
+    value: function onTestHeadWithResponseBody() {
+      var _this7 = this;
+
+      _jquery2.default.ajax({
+        url: '/counter',
+        type: 'HEAD',
+        complete: function complete(data) {
+          _this7.setState({
+            lastResponseHeader: data.getResponseHeader('count')
+          });
+        }
       });
     }
   }]);

@@ -33,6 +33,11 @@ let server = app.listen(1337, function () {
 
 var counter = 0;
 
+app.head('/counter', function (req, res) {
+  res.set('Counter', counter)
+  res.end();
+})
+
 app.get('/counter', function (req, res) {
   res.send('' + counter);
 })

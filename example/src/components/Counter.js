@@ -7,6 +7,7 @@ export default class Counter extends React.Component {
     this.state = {
       counter: 0,
       lastMessage: '',
+      lastResponseHeader: '',
       sw1: null,
       sw2: null
     };
@@ -85,11 +86,22 @@ export default class Counter extends React.Component {
           >
             Post, will return 402
           </button>
+          <button
+              data-test="button-test-head-with-responseBody"
+              type="button"
+              onClick={this.onTestHeadWithResponseBody.bind(this)}
+          >
+            Head, with return responseBody
+          </button>
         </h2>
 
         <h3>
           Counter value:
           <span data-test="counter-label">{this.state.counter} </span>
+        </h3>
+        <h3>
+          Response Header:
+          <span data-text="response-header" id="response-header">{this.state.lastResponseHeader}</span>
         </h3>
         <h3>
           Last result:
@@ -159,6 +171,18 @@ export default class Counter extends React.Component {
       self.setState({
         lastMessage: (response.status + ', ' + response.responseText)
       });
+    });
+  }
+
+  onTestHeadWithResponseBody() {
+    $.ajax({
+      url: '/counter',
+      type: 'HEAD',
+      complete: data => {
+        this.setState({
+          lastResponseHeader: data.getResponseHeader('count'),
+        });
+      }
     });
   }
 }
