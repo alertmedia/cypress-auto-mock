@@ -92,8 +92,4 @@ describe('test', function () {
     cy.get('[data-test=button-test-post-with-error]').click();
     cy.get('[data-test=result-text]').contains('402');
   });
-
-  it('get header', function () {
-    cy.get('[data-test=button-test-head-with-responseBody]').click();
-  });
 })

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import Counter from './components/Counter';
+import HeadPage from "./components/HeadPage";
 import express from 'express';
 import url from 'url';
 
@@ -16,6 +17,12 @@ app.use(express.static('public'));
 app.get('/', function (req, res) {
   res.render('layout', {
     content: ReactDOMServer.renderToString(<Counter />)
+  });
+});
+
+app.get('/head', (req, res) => {
+  res.render('layout', {
+    content: ReactDOMServer.renderToString(<HeadPage />)
   });
 });
 

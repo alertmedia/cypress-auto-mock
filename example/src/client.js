@@ -12,5 +12,7 @@ import installCypressHooks from '../../include-in-webapp';
 installCypressHooks();
 
 import Counter from './components/Counter';
+import HeadPage from "./components/HeadPage";
 
 ReactDOM.render(<Counter />, document.getElementById('content'));
+ReactDOM.render(<HeadPage />, document.getElementById('content'));
