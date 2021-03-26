@@ -79,23 +79,9 @@ after(() => {
   cy.automockEnd();
 });
 ```
-<<<<<<< HEAD
-  // The name of the JSON file that contains the recorded mock data.
-  const MOCK_FILENAME = 'testCounter';
-
-  before(() => {
-    // default options
-    let options = {
-      isCustomMock: false,
-      outDir: '/tests/e2e/mocks'
-    };
-    cy.automock(MOCK_FILENAME, {...options});
-  });
-=======
 
 The `cy.automock()` takes an optional parameter which may contain a function named `resolveMockFunc`. This can be used to
 resolve to a different recorded mock than this library would normally pick. You can pass it like so:
->>>>>>> 6c48fa07f017f06512934136ca745c3385bd060e
 
 ```js
 cy.automock(MOCK_FILENAME, {

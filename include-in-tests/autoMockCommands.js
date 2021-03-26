@@ -25,13 +25,6 @@ function registerAutoMockCommands() {
   var pendingApiCount = 0;
   let automocker = null;
 
-<<<<<<< HEAD
-  Cypress.Commands.add('automock', (sessionName, options) => {
-    const automockRecord = Cypress.config().automocker ? (Cypress.config().automocker.record !== false) : true;
-    const automockPlayback = Cypress.config().automocker ? (Cypress.config().automocker.playback !== false) : true;
-    
-    // Merge default options with the ones provided
-=======
   Cypress.Commands.add("automock", (sessionName, options) => {
     const automockRecord = Cypress.config().automocker
       ? Cypress.config().automocker.record !== false
@@ -41,7 +34,6 @@ function registerAutoMockCommands() {
       : true;
 
     const testDirPath = "./cypress/integration";
->>>>>>> 6c48fa07f017f06512934136ca745c3385bd060e
     options = setOptions(options);
 
     // determine the mock file name
@@ -49,11 +41,7 @@ function registerAutoMockCommands() {
       sessionName += ".json";
     }
 
-<<<<<<< HEAD
-    currentMockFileName = options.outDir + sessionName;
-=======
     currentMockFileName = testDirPath + "/../automocks/" + sessionName;
->>>>>>> 6c48fa07f017f06512934136ca745c3385bd060e
 
     // get the absolute path for recording purposes
     const pwd = Cypress.platform === "win32" ? "cd" : "pwd";
@@ -61,16 +49,11 @@ function registerAutoMockCommands() {
     cy.exec(pwd, {
       log: false
     }).then(result => {
-<<<<<<< HEAD
-      const absolutePathToMockFile = result.stdout + options.outDir + sessionName;
-
-=======
       const mockFilePath = result.stdout + "/cypress/automocks/" + sessionName;
       const absolutePathToMockFile =
         Cypress.platform === "win32"
           ? mockFilePath.split("/").join("\\")
           : mockFilePath;
->>>>>>> 6c48fa07f017f06512934136ca745c3385bd060e
       // if the config allows us to replay the mock, test if it exists
       if (automockPlayback) {
         cy.exec(ls + absolutePathToMockFile, {
