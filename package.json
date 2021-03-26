@@ -1,5 +1,5 @@
 {
-  "name": "alertmedia-cypress-auto-mock",
+  "name": "cypressautomocker",
   "version": "1.0.8",
   "description": "A set of extensions to cypress.io that allows automatic recording and playback of APIs",
   "main": "index.js",
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alertmedia/cypress-auto-mock.git"
+    "url": "git+https://github.com/MarekJavurek/cypressautomocker.git"
   },
   "keywords": [
     "cypress.io",
@@ -17,13 +17,12 @@
   "author": "Scott Schafer and Alexander Polatnick and Manuel Yang and Kyle Witt",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/alertmedia/cypress-auto-mock/issues"
+    "url": "https://github.com/MarekJavurek/cypressautomocker/issues"
   },
-  "homepage": "https://github.com/alertmedia/cypress-auto-mock#readme",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
-  "directories": {
-    "example": "example"
+  "homepage": "https://github.com/MarekJavurek/cypressautomocker#readme",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "jquery": "^3.4.1"
   }
 }
