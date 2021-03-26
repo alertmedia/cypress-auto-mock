@@ -8,22 +8,21 @@ import url from 'url';
 let app = express();
 
 // Set the view engine to ejs
+// `views`, the directory where the template files are located
 app.set('view engine', 'ejs');
 
 // Serve static files from the 'public' folder
 app.use(express.static('public'));
 
+// Log Middleware
+app.use((req, res, next) => {
+  console.log(`Time: ${new Date(Date.now()).toLocaleString()}, Request Type: ${req.method}, Request URL: ${req.url}`);
+  next();
+})
+
 // GET /
 app.get('/', function (req, res) {
-  res.render('layout', {
-    content: ReactDOMServer.renderToString(<Counter />)
-  });
-});
-
-app.get('/head', (req, res) => {
-  res.render('layout', {
-    content: ReactDOMServer.renderToString(<HeadPage />)
-  });
+  res.render('layout', {});
 });
 
 // Start server

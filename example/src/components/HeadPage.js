@@ -22,6 +22,11 @@ export default class HeadPage extends React.Component {
         </h2>
 
         <h3>
+          Last result:
+          <span data-test="result-text" id="result">{this.state.lastMessage} </span>
+        </h3>
+
+        <h3>
           Response Header:
           <span data-text="response-header" id="response-header">{this.state.lastResponseHeader}</span>
         </h3>
@@ -29,14 +34,25 @@ export default class HeadPage extends React.Component {
     )
   }
 
-
   onTestHeadWithResponseBody() {
     $.ajax({
       url: '/counter',
       type: 'HEAD',
+      async: true,
+      success: (message, text, response) => {
+        console.log(message);
+        console.log(text);
+        console.log(response);
+        console.log(response.getAllResponseHeaders());
+        console.log(response.getResponseHeader('counter'));
+      },
       complete: data => {
+        console.log('onTestHeadWithResponseBody')
+        console.log(data)
+        console.log(data.getAllResponseHeaders())
+        console.log(data.getResponseHeader('counter'))
         this.setState({
-          lastResponseHeader: data.getResponseHeader('Counter'),
+          lastResponseHeader: data.getResponseHeader('counter'),
         });
       }
     });

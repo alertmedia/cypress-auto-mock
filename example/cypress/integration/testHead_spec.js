@@ -11,7 +11,7 @@ describe('head', () => {
   })
 
   it('get header', () => {
-    cy.visit('/head');
+    cy.visit('/');
     cy.get('[data-test=button-test-head-with-responseBody]').click();
     cy.get('[data-text=response-header]').contains('0');
   });

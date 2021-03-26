@@ -202,19 +202,20 @@ FakeXMLHttpRequest.prototype = {
           args = [request.url, data]
         }
         // set response headers
-        var responseHeaders = null;
-        if (typeof item.headers === 'function') {
-          responseHeaders = item.headers.apply(null, args);
-        } else if (typeof item.headers === 'object') {
-          responseHeaders = item.headers;
-        }
-        if (responseHeaders && typeof responseHeaders === 'object') {
-          for (var name in responseHeaders) {
-            if (responseHeaders.hasOwnProperty(name)) {
-              request.responseHeaders[name.toLowerCase()] = responseHeaders[name];
-            }
-          }
-        }
+        // var responseHeaders = null;
+        // if (typeof item.headers === 'function') {
+        //   responseHeaders = item.headers.apply(null, args);
+        // } else if (typeof item.headers === 'object') {
+        //   responseHeaders = item.headers;
+        // }
+        // if (responseHeaders && typeof responseHeaders === 'object') {
+        //   for (var name in responseHeaders) {
+        //     if (responseHeaders.hasOwnProperty(name)) {
+        //       request.responseHeaders[name.toLowerCase()] = responseHeaders[name];
+        //     }
+        //   }
+        // }
+        request.responseHeaders = item.responseHeaders;
         request.status = item.status;
         request.statusText = item.statusText;
         request.readyState = XMLHttpRequest.HEADERS_RECEIVED;
@@ -312,13 +313,18 @@ FakeXMLHttpRequest.prototype = {
   },
 
   getResponseHeader: function (header) {
-    if (this.responseHeaders.hasOwnProperty(header.toLowerCase())) {
+    console.log("getResponseHeader")
+    if (autoMocker.isMocking && this.responseHeaders.hasOwnProperty(header.toLowerCase())) {
       return this.responseHeaders[header.toLowerCase()];
     }
     return this.object.getResponseHeader(header);
   },
 
   getAllResponseHeaders: function () {
+    console.log("getAllResponseHeaders")
+    if (autoMocker.isMocking) {
+      return this.responseHeaders;
+    }
     return this.object.getAllResponseHeaders();
   },
 
@@ -342,8 +348,8 @@ FakeXMLHttpRequest.setup = function () {
 };
 FakeXMLHttpRequest.restore = function () {
   FakeXMLHttpRequest.handlers = [];
-  window.XMLHttpRequest = window.originalXHR;
-  delete window.originalXHR;
+  window.XMLHttpRequest = window.OriginalXHR;
+  delete window.OriginalXHR;
 };
 FakeXMLHttpRequest.addHandler = function (handler) {
   FakeXMLHttpRequest.handlers.push(handler);

@@ -147,17 +147,34 @@ function registerAutoMockCommands() {
             mock = apiKeyToMocks[key][apiCount];
           }
         }
-
         if (currentOptions.resolveMockFunc) {
           mock = currentOptions.resolveMockFunc(request, mockArray, mock);
         }
-
+        // this header gets called to parse the header from mock into key, value object.
+        // let headers = (completeMatch, keyword, data) => {
+        //   // get the raw header string
+        //   let headers = mock.responseHeaders;
+        //
+        //   // convert the header string into an array of individual headers
+        //   let arr = headers.trim().split(/[\r\n]+/);
+        //
+        //   // create a map of header names to values
+        //   let headerMap = {};
+        //   arr.forEach(line => {
+        //     let parts = line.split(': ');
+        //     let header = parts.shift();
+        //     headerMap[header] = parts.join(': ');
+        //   });
+        //   return headerMap;
+        // }
         if (mock) {
           console.log("MOCKING " + request.url);
           return {
             status: mock.status,
             statusText: mock.statusText,
-            response: JSON.stringify(mock.response)
+            response: JSON.stringify(mock.response),
+            // headers: headers,
+            responseHeaders: mock.responseHeaders
           };
         }
 
@@ -191,7 +208,8 @@ function registerAutoMockCommands() {
                   response: responseObject,
                   status: xhr.status,
                   statusText: xhr.statusText,
-                  contentType: contentType
+                  contentType: contentType,
+                  responseHeaders: xhr.getAllResponseHeaders()  // add response headers to record head parameters (we might make a switch
                 };
                 recordedApis.push(transformedObject);
               }

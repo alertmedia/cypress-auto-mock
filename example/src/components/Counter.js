@@ -116,7 +116,9 @@ export default class Counter extends React.Component {
 
   onIncrement(increment, delay) {
     const url = '/counter?increment=' + increment + '&delay=' + delay;
-    $.post(url, data => {
+    $.post(url, (data, textStatus, xhr) => {
+      console.log(data);
+      console.log(xhr.getResponseHeader('count'))
       this.setState({
         lastMessage: data
       });
