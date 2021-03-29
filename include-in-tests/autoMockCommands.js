@@ -173,7 +173,7 @@ function registerAutoMockCommands() {
             status: mock.status,
             statusText: mock.statusText,
             response: JSON.stringify(mock.response),
-            headers: headers,
+            // headers: headers,
             responseHeaders: mock.responseHeaders
           };
         }
