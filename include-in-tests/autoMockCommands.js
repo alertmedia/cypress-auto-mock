@@ -220,7 +220,7 @@ function registerAutoMockCommands() {
               let query = "";
               var blobResponseObject = null;
 
-              console.log("RECORD: " + url);
+              console.log("RECORD: " + getApiKey(xhr));
 
               if (typeof xhr.object.response === "object") {
                 var fr = new FileReader();
