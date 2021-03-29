@@ -112,7 +112,7 @@
     this.ontimeout = null;
 
     this.readyState = XMLHttpRequest.UNSENT;
-    this.responseHeaders = {};
+    this.responseHeaders = '';
     this.response = '';
     this.responseText = '';
     this.responseType = '';
