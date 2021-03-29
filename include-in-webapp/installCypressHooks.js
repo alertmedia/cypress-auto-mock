@@ -313,7 +313,6 @@ FakeXMLHttpRequest.prototype = {
   },
 
   getResponseHeader: function (header) {
-    console.log("getResponseHeader")
     if (autoMocker.isMocking && this.responseHeaders.hasOwnProperty(header.toLowerCase())) {
       return this.responseHeaders[header.toLowerCase()];
     }
@@ -321,7 +320,6 @@ FakeXMLHttpRequest.prototype = {
   },
 
   getAllResponseHeaders: function () {
-    console.log("getAllResponseHeaders")
     if (autoMocker.isMocking) {
       return this.responseHeaders;
     }
