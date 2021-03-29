@@ -168,7 +168,7 @@ function registerAutoMockCommands() {
         //   return headerMap;
         // }
         if (mock) {
-          console.log("MOCKING " + request.url);
+          console.log("MOCKING " + getApiKey(request));
           return {
             status: mock.status,
             statusText: mock.statusText,
@@ -177,7 +177,6 @@ function registerAutoMockCommands() {
             responseHeaders: mock.responseHeaders
           };
         }
-
       } else if (automocker.isRecording) {
         function prepareOnLoadHandler(xhr) {
           (function() {
@@ -209,7 +208,7 @@ function registerAutoMockCommands() {
                   status: xhr.status,
                   statusText: xhr.statusText,
                   contentType: contentType,
-                  responseHeaders: xhr.getAllResponseHeaders()  // add response headers to record head parameters (we might make a switch
+                  responseHeaders: xhr.getAllResponseHeaders()  // add response headers to record head parameters
                 };
                 recordedApis.push(transformedObject);
               }
