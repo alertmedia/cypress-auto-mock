@@ -296,6 +296,8 @@ function registerAutoMockCommands() {
     });
 
     console.log("USING MOCK SERVER");
+    console.log("MOCK DIRECTORY");
+    console.log(apiKeyToMocks);
   }
 
   function setOptions(options) {
