@@ -258,7 +258,7 @@ function registerAutoMockCommands() {
       }
       if (automocker.isMocking) {
         console.log(
-          "MOCKING ON, but letting this fall through: " + request.url
+          "MOCKING ON, but letting this fall through cause it could not find a match: " + getApiKey(request)
         );
       }
       ++pendingApiCount;
