@@ -151,29 +151,29 @@ function registerAutoMockCommands() {
           mock = currentOptions.resolveMockFunc(request, mockArray, mock);
         }
         // this header gets called to parse the header from mock into key, value object.
-        // let headers = (completeMatch, keyword, data) => {
-        //   // get the raw header string
-        //   let headers = mock.responseHeaders;
-        //
-        //   // convert the header string into an array of individual headers
-        //   let arr = headers.trim().split(/[\r\n]+/);
-        //
-        //   // create a map of header names to values
-        //   let headerMap = {};
-        //   arr.forEach(line => {
-        //     let parts = line.split(': ');
-        //     let header = parts.shift();
-        //     headerMap[header] = parts.join(': ');
-        //   });
-        //   return headerMap;
-        // }
+        let headers = (completeMatch, keyword, data) => {
+          // get the raw header string
+          let headers = mock.responseHeaders;
+
+          // convert the header string into an array of individual headers
+          let arr = headers.trim().split(/[\r\n]+/);
+
+          // create a map of header names to values
+          let headerMap = {};
+          arr.forEach(line => {
+            let parts = line.split(': ');
+            let header = parts.shift();
+            headerMap[header] = parts.join(': ');
+          });
+          return headerMap;
+        }
         if (mock) {
           console.log("MOCKING " + getApiKey(request));
           return {
             status: mock.status,
             statusText: mock.statusText,
             response: JSON.stringify(mock.response),
-            // headers: headers,
+            headers: headers,
             responseHeaders: mock.responseHeaders
           };
         }
