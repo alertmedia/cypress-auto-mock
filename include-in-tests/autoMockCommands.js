@@ -138,6 +138,34 @@ function registerAutoMockCommands() {
     isRecording: false,
     isMocking: false,
     recordedApis: recordedApis,
+    recordTransformedObject: (
+      xhr,
+      requestBody,
+      responseBody
+    ) => {
+      let contentType = xhr.getResponseHeader("content-type");
+      if (
+        contentType !== null &&
+        contentType.toLowerCase().indexOf("application/json") !== -1
+      ) {
+        try {
+          responseBody = JSON.parse(responseBody);
+        } catch (e) {
+        }
+      }
+      let transformedObject = {
+        method: xhr.method,
+        path: parseUri(xhr.url).path,
+        query: parseUri(xhr.url).query,
+        request: requestBody,
+        response: responseBody,
+        status: xhr.status,
+        statusText: xhr.statusText,
+        contentType: contentType,
+        responseHeaders: xhr.getAllResponseHeaders()  // add response headers to record head parameters
+      };
+      recordedApis.push(transformedObject);
+    },
     prepareOnLoadHandler: (xhr) => {
       (function () {
         const old_onload = xhr.onload;
@@ -145,35 +173,6 @@ function registerAutoMockCommands() {
         const method = xhr.method;
 
         xhr.onload = () => {
-          function recordTransformedObject(
-            xhr,
-            requestObject,
-            responseObject
-          ) {
-            let contentType = xhr.getResponseHeader("content-type");
-            if (
-              contentType !== null &&
-              contentType.toLowerCase().indexOf("application/json") !== -1
-            ) {
-              try {
-                responseObject = JSON.parse(responseObject);
-              } catch (e) {
-              }
-            }
-            let transformedObject = {
-              method: xhr.method,
-              path: parseUri(xhr.url).path,
-              query: parseUri(xhr.url).query,
-              request: requestObject,
-              response: responseObject,
-              status: xhr.status,
-              statusText: xhr.statusText,
-              contentType: contentType,
-              responseHeaders: xhr.getAllResponseHeaders()  // add response headers to record head parameters
-            };
-            recordedApis.push(transformedObject);
-          }
-
           if (old_onload) {
             old_onload();
           }
@@ -199,17 +198,13 @@ function registerAutoMockCommands() {
               } else {
                 responseObject = blobResponseObject;
               }
-              recordTransformedObject(xhr, requestObject, responseObject);
+              window.Cypress.autoMocker.recordTransformedObject(xhr, requestObject, responseObject);
             };
             fr.readAsText(xhr.object.response);
           } else {
-            let requestObject = xhr.request
-              ? JSON.parse(JSON.stringify(xhr.request))
-              : "";
-            let responseObject = xhr.response
-              ? JSON.parse(JSON.stringify(xhr.response))
-              : "";
-            recordTransformedObject(xhr, requestObject, responseObject);
+            let requestObject = xhr.request ? JSON.parse(JSON.stringify(xhr.request)) : "";
+            let responseObject = xhr.response ? JSON.parse(JSON.stringify(xhr.response)) : "";
+            window.Cypress.autoMocker.recordTransformedObject(xhr, requestObject, responseObject);
           }
         };
       })();
@@ -340,7 +335,6 @@ function registerAutoMockCommands() {
 
   // (c) Steven Levithan <stevenlevithan.com>
   // MIT License
-
   function parseUri(str) {
     var o = parseUri.options,
       m = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
@@ -384,4 +378,6 @@ function registerAutoMockCommands() {
       loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
     }
   };
+
+  window.Cypress.autoMocker.parseUri = parseUri;
 }
