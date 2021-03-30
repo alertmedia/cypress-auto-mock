@@ -138,6 +138,9 @@ function registerAutoMockCommands() {
     isRecording: false,
     isMocking: false,
     recordedApis: recordedApis,
+    setOptions: setOptions,
+    getApiKey: getApiKey,
+    parseUri: parseUri,
     addRecordedApis: (transformedObject) => {
       recordedApis.push(transformedObject);
     },
@@ -212,6 +215,22 @@ function registerAutoMockCommands() {
         };
       })();
     },
+    autoMockRequestCommand: (request) => {
+      let localRequest = request;
+      localRequest.method = `REQUEST.${localRequest.method}`;
+      let key = getApiKey(request);
+      let mock = null;
+      if (apiKeyToMocks.hasOwnProperty(key)) {
+        const apiCount = apiKeyToCallCounts[key]++;
+        if (apiCount < apiKeyToMocks[key].length) {
+          mock = apiKeyToMocks[key][apiCount];
+        }
+      }
+      if (mock) {
+        console.log("MOCKING: " + getApiKey(request))
+        return JSON.parse(mock.data);
+      }
+    },
     autoMockResponse: (request) => {
       let key = getApiKey(request);
       let mock = null;
@@ -250,11 +269,15 @@ function registerAutoMockCommands() {
           // headers: headers,
           responseHeaders: mock.responseHeaders
         };
-      }
+      };
+      return false;
     },
     mockResponse: request => {
       if (automocker.isMocking) {
-        window.Cypress.autoMocker.autoMockResponse(request);
+        let ret = window.Cypress.autoMocker.autoMockResponse(request);
+        if (ret !== false) {
+          return ret;
+        }
       } else if (automocker.isRecording) {
         window.Cypress.autoMocker.prepareOnLoadHandler(request);
       }
@@ -320,6 +343,12 @@ function registerAutoMockCommands() {
     return options;
   }
 
+  /**
+   * Construct the api key that is used to match.  If the method is GET or HEAD, include the url params.
+   *
+   * @param api
+   * @returns {string}
+   */
   function getApiKey(api) {
     let path = api.path;
     if (api.query && ["GET", "HEAD"].includes(api.method)) {
@@ -381,6 +410,4 @@ function registerAutoMockCommands() {
       loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
     }
   };
-
-  window.Cypress.autoMocker.parseUri = parseUri;
 }
