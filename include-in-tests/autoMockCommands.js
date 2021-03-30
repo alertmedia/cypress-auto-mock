@@ -137,123 +137,128 @@ function registerAutoMockCommands() {
   automocker = window.Cypress.autoMocker = {
     isRecording: false,
     isMocking: false,
-    mockResponse: request => {
-      if (automocker.isMocking) {
-        let key = getApiKey(request);
-        let mock = null;
-        if (apiKeyToMocks.hasOwnProperty(key)) {
-          const apiCount = apiKeyToCallCounts[key]++;
-          if (apiCount < apiKeyToMocks[key].length) {
-            mock = apiKeyToMocks[key][apiCount];
+    recordedApis: recordedApis,
+    prepareOnLoadHandler: (xhr) => {
+      (function () {
+        const old_onload = xhr.onload;
+        const url = xhr.url;
+        const method = xhr.method;
+
+        xhr.onload = () => {
+          function recordTransformedObject(
+            xhr,
+            requestObject,
+            responseObject
+          ) {
+            let contentType = xhr.getResponseHeader("content-type");
+            if (
+              contentType !== null &&
+              contentType.toLowerCase().indexOf("application/json") !== -1
+            ) {
+              try {
+                responseObject = JSON.parse(responseObject);
+              } catch (e) {
+              }
+            }
+            let transformedObject = {
+              method: xhr.method,
+              path: parseUri(xhr.url).path,
+              query: parseUri(xhr.url).query,
+              request: requestObject,
+              response: responseObject,
+              status: xhr.status,
+              statusText: xhr.statusText,
+              contentType: contentType,
+              responseHeaders: xhr.getAllResponseHeaders()  // add response headers to record head parameters
+            };
+            recordedApis.push(transformedObject);
           }
-        }
-        if (currentOptions.resolveMockFunc) {
-          mock = currentOptions.resolveMockFunc(request, mockArray, mock);
-        }
-        // this header gets called to parse the header from mock into key, value object.
-        // let headers = (completeMatch, keyword, data) => {
-        //   // get the raw header string
-        //   let headers = mock.responseHeaders;
-        //
-        //   // convert the header string into an array of individual headers
-        //   let arr = headers.trim().split(/[\r\n]+/);
-        //
-        //   // create a map of header names to values
-        //   let headerMap = {};
-        //   arr.forEach(line => {
-        //     let parts = line.split(': ');
-        //     let header = parts.shift();
-        //     headerMap[header] = parts.join(': ');
-        //   });
-        //   return headerMap;
-        // }
-        if (mock) {
-          console.log("MOCKING " + getApiKey(request));
-          return {
-            status: mock.status,
-            statusText: mock.statusText,
-            response: JSON.stringify(mock.response),
-            // headers: headers,
-            responseHeaders: mock.responseHeaders
-          };
-        }
-      } else if (automocker.isRecording) {
-        function prepareOnLoadHandler(xhr) {
-          (function() {
-            const old_onload = xhr.onload;
-            const url = xhr.url;
-            const method = xhr.method;
 
-            xhr.onload = () => {
-              function recordTransformedObject(
-                xhr,
-                requestObject,
-                responseObject
-              ) {
-                let contentType = xhr.getResponseHeader("content-type");
-                if (
-                  contentType !== null &&
-                  contentType.toLowerCase().indexOf("application/json") !== -1
-                ) {
-                  try {
-                    responseObject = JSON.parse(responseObject);
-                  } catch (e) {}
-                }
-                let transformedObject = {
-                  method: xhr.method,
-                  path: parseUri(xhr.url).path,
-                  query: parseUri(xhr.url).query,
-                  request: requestObject,
-                  response: responseObject,
-                  status: xhr.status,
-                  statusText: xhr.statusText,
-                  contentType: contentType,
-                  responseHeaders: xhr.getAllResponseHeaders()  // add response headers to record head parameters
-                };
-                recordedApis.push(transformedObject);
-              }
+          if (old_onload) {
+            old_onload();
+          }
+          let parsed = parseUri(url);
+          let query = "";
+          var blobResponseObject = null;
 
-              if (old_onload) {
-                old_onload();
-              }
-              let parsed = parseUri(url);
-              let query = "";
-              var blobResponseObject = null;
+          console.log("RECORD: " + getApiKey(xhr));
 
-              console.log("RECORD: " + getApiKey(xhr));
-
-              if (typeof xhr.object.response === "object") {
-                var fr = new FileReader();
-                fr.onload = function(e) {
-                  var blobText = e.target.result;
-                  blobResponseObject = JSON.parse(blobText);
-                  let requestObject = xhr.request
-                    ? JSON.parse(JSON.stringify(xhr.request))
-                    : "";
-                  let responseObject;
-                  if (!blobResponseObject) {
-                    responseObject = xhr.response
-                      ? JSON.parse(JSON.stringify(xhr.response))
-                      : "";
-                  } else {
-                    responseObject = blobResponseObject;
-                  }
-                  recordTransformedObject(xhr, requestObject, responseObject);
-                };
-                fr.readAsText(xhr.object.response);
-              } else {
-                let requestObject = xhr.request
-                  ? JSON.parse(JSON.stringify(xhr.request))
-                  : "";
-                let responseObject = xhr.response
+          if (typeof xhr.object.response === "object") {
+            var fr = new FileReader();
+            fr.onload = function (e) {
+              var blobText = e.target.result;
+              blobResponseObject = JSON.parse(blobText);
+              let requestObject = xhr.request
+                ? JSON.parse(JSON.stringify(xhr.request))
+                : "";
+              let responseObject;
+              if (!blobResponseObject) {
+                responseObject = xhr.response
                   ? JSON.parse(JSON.stringify(xhr.response))
                   : "";
-                recordTransformedObject(xhr, requestObject, responseObject);
+              } else {
+                responseObject = blobResponseObject;
               }
+              recordTransformedObject(xhr, requestObject, responseObject);
             };
-          })();
+            fr.readAsText(xhr.object.response);
+          } else {
+            let requestObject = xhr.request
+              ? JSON.parse(JSON.stringify(xhr.request))
+              : "";
+            let responseObject = xhr.response
+              ? JSON.parse(JSON.stringify(xhr.response))
+              : "";
+            recordTransformedObject(xhr, requestObject, responseObject);
+          }
+        };
+      })();
+    },
+    autoMockResponse: (request) => {
+      let key = getApiKey(request);
+      let mock = null;
+      if (apiKeyToMocks.hasOwnProperty(key)) {
+        const apiCount = apiKeyToCallCounts[key]++;
+        if (apiCount < apiKeyToMocks[key].length) {
+          mock = apiKeyToMocks[key][apiCount];
         }
-        prepareOnLoadHandler(request);
+      }
+      if (currentOptions.resolveMockFunc) {
+        mock = currentOptions.resolveMockFunc(request, mockArray, mock);
+      }
+      // this header gets called to parse the header from mock into key, value object.
+      // let headers = (completeMatch, keyword, data) => {
+      //   // get the raw header string
+      //   let headers = mock.responseHeaders;
+      //
+      //   // convert the header string into an array of individual headers
+      //   let arr = headers.trim().split(/[\r\n]+/);
+      //
+      //   // create a map of header names to values
+      //   let headerMap = {};
+      //   arr.forEach(line => {
+      //     let parts = line.split(': ');
+      //     let header = parts.shift();
+      //     headerMap[header] = parts.join(': ');
+      //   });
+      //   return headerMap;
+      // }
+      if (mock) {
+        console.log("MOCKING " + getApiKey(request));
+        return {
+          status: mock.status,
+          statusText: mock.statusText,
+          response: JSON.stringify(mock.response),
+          // headers: headers,
+          responseHeaders: mock.responseHeaders
+        };
+      }
+    },
+    mockResponse: request => {
+      if (automocker.isMocking) {
+        window.Cypress.autoMocker.autoMockResponse(request);
+      } else if (automocker.isRecording) {
+        window.Cypress.autoMocker.prepareOnLoadHandler(request);
       }
       if (automocker.isMocking) {
         console.log(
