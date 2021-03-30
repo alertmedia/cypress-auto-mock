@@ -229,7 +229,8 @@ function registerAutoMockCommands() {
       if (mock) {
         console.log("MOCKING: " + getApiKey(request))
         return JSON.parse(mock.data);
-      }
+      };
+      return false;
     },
     autoMockResponse: (request) => {
       let key = getApiKey(request);
