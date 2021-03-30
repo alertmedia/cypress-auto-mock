@@ -138,6 +138,9 @@ function registerAutoMockCommands() {
     isRecording: false,
     isMocking: false,
     recordedApis: recordedApis,
+    addRecordedApis: (transformedObject) => {
+      recordedApis.push(transformedObject);
+    },
     recordTransformedObject: (
       xhr,
       requestBody,
