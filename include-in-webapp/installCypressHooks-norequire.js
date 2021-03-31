@@ -112,7 +112,7 @@
     this.ontimeout = null;
 
     this.readyState = XMLHttpRequest.UNSENT;
-    this.responseHeaders = {};
+    this.responseHeaders = '';
     this.response = '';
     this.responseText = '';
     this.responseType = '';
@@ -181,19 +181,20 @@
             args = [request.url, data];
           }
           // set response headers
-          var responseHeaders = null;
-          if (typeof item.headers === 'function') {
-            responseHeaders = item.headers.apply(null, args);
-          } else if (_typeof(item.headers) === 'object') {
-            responseHeaders = item.headers;
-          }
-          if (responseHeaders && (typeof responseHeaders === 'undefined' ? 'undefined' : _typeof(responseHeaders)) === 'object') {
-            for (var name in responseHeaders) {
-              if (responseHeaders.hasOwnProperty(name)) {
-                request.responseHeaders[name.toLowerCase()] = responseHeaders[name];
-              }
-            }
-          }
+          // var responseHeaders = null;
+          // if (typeof item.headers === 'function') {
+          //   responseHeaders = item.headers.apply(null, args);
+          // } else if (_typeof(item.headers) === 'object') {
+          //   responseHeaders = item.headers;
+          // }
+          // if (responseHeaders && (typeof responseHeaders === 'undefined' ? 'undefined' : _typeof(responseHeaders)) === 'object') {
+          //   for (var name in responseHeaders) {
+          //     if (responseHeaders.hasOwnProperty(name)) {
+          //       request.responseHeaders[name.toLowerCase()] = responseHeaders[name];
+          //     }
+          //   }
+          // }
+          request.responseHeaders = item.responseHeaders;
           request.status = item.status;
           request.statusText = item.statusText;
           request.readyState = XMLHttpRequest.HEADERS_RECEIVED;

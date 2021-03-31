@@ -137,110 +137,154 @@ function registerAutoMockCommands() {
   automocker = window.Cypress.autoMocker = {
     isRecording: false,
     isMocking: false,
-    mockResponse: request => {
-      if (automocker.isMocking) {
-        let key = getApiKey(request);
-        let mock = null;
-        if (apiKeyToMocks.hasOwnProperty(key)) {
-          const apiCount = apiKeyToCallCounts[key]++;
-          if (apiCount < apiKeyToMocks[key].length) {
-            mock = apiKeyToMocks[key][apiCount];
+    recordedApis: recordedApis,
+    setOptions: setOptions,
+    getApiKey: getApiKey,
+    parseUri: parseUri,
+    addRecordedApis: (transformedObject) => {
+      recordedApis.push(transformedObject);
+    },
+    recordTransformedObject: (
+      xhr,
+      requestBody,
+      responseBody
+    ) => {
+      let contentType = xhr.getResponseHeader("content-type");
+      if (
+        contentType !== null &&
+        contentType.toLowerCase().indexOf("application/json") !== -1
+      ) {
+        try {
+          responseBody = JSON.parse(responseBody);
+        } catch (e) {
+        }
+      }
+      let transformedObject = {
+        method: xhr.method,
+        path: parseUri(xhr.url).path,
+        query: parseUri(xhr.url).query,
+        request: requestBody,
+        response: responseBody,
+        status: xhr.status,
+        statusText: xhr.statusText,
+        contentType: contentType,
+        responseHeaders: xhr.getAllResponseHeaders()  // add response headers to record head parameters
+      };
+      recordedApis.push(transformedObject);
+    },
+    prepareOnLoadHandler: (xhr) => {
+      (function () {
+        const old_onload = xhr.onload;
+        const url = xhr.url;
+        const method = xhr.method;
+
+        xhr.onload = () => {
+          if (old_onload) {
+            old_onload();
           }
-        }
+          let parsed = parseUri(url);
+          let query = "";
+          var blobResponseObject = null;
 
-        if (currentOptions.resolveMockFunc) {
-          mock = currentOptions.resolveMockFunc(request, mockArray, mock);
-        }
+          console.log("RECORD: " + getApiKey(xhr));
 
-        if (mock) {
-          console.log("MOCKING " + request.url);
-          return {
-            status: mock.status,
-            statusText: mock.statusText,
-            response: JSON.stringify(mock.response)
-          };
-        }
-
-      } else if (automocker.isRecording) {
-        function prepareOnLoadHandler(xhr) {
-          (function() {
-            const old_onload = xhr.onload;
-            const url = xhr.url;
-            const method = xhr.method;
-
-            xhr.onload = () => {
-              function recordTransformedObject(
-                xhr,
-                requestObject,
-                responseObject
-              ) {
-                let contentType = xhr.getResponseHeader("content-type");
-                if (
-                  contentType !== null &&
-                  contentType.toLowerCase().indexOf("application/json") !== -1
-                ) {
-                  try {
-                    responseObject = JSON.parse(responseObject);
-                  } catch (e) {}
-                }
-                let transformedObject = {
-                  method: xhr.method,
-                  path: parseUri(xhr.url).path,
-                  query: parseUri(xhr.url).query,
-                  request: requestObject,
-                  response: responseObject,
-                  status: xhr.status,
-                  statusText: xhr.statusText,
-                  contentType: contentType
-                };
-                recordedApis.push(transformedObject);
-              }
-
-              if (old_onload) {
-                old_onload();
-              }
-              let parsed = parseUri(url);
-              let query = "";
-              var blobResponseObject = null;
-
-              console.log("RECORD: " + url);
-
-              if (typeof xhr.object.response === "object") {
-                var fr = new FileReader();
-                fr.onload = function(e) {
-                  var blobText = e.target.result;
-                  blobResponseObject = JSON.parse(blobText);
-                  let requestObject = xhr.request
-                    ? JSON.parse(JSON.stringify(xhr.request))
-                    : "";
-                  let responseObject;
-                  if (!blobResponseObject) {
-                    responseObject = xhr.response
-                      ? JSON.parse(JSON.stringify(xhr.response))
-                      : "";
-                  } else {
-                    responseObject = blobResponseObject;
-                  }
-                  recordTransformedObject(xhr, requestObject, responseObject);
-                };
-                fr.readAsText(xhr.object.response);
-              } else {
-                let requestObject = xhr.request
-                  ? JSON.parse(JSON.stringify(xhr.request))
-                  : "";
-                let responseObject = xhr.response
+          if (typeof xhr.object.response === "object") {
+            var fr = new FileReader();
+            fr.onload = function (e) {
+              var blobText = e.target.result;
+              blobResponseObject = JSON.parse(blobText);
+              let requestObject = xhr.request
+                ? JSON.parse(JSON.stringify(xhr.request))
+                : "";
+              let responseObject;
+              if (!blobResponseObject) {
+                responseObject = xhr.response
                   ? JSON.parse(JSON.stringify(xhr.response))
                   : "";
-                recordTransformedObject(xhr, requestObject, responseObject);
+              } else {
+                responseObject = blobResponseObject;
               }
+              window.Cypress.autoMocker.recordTransformedObject(xhr, requestObject, responseObject);
             };
-          })();
+            fr.readAsText(xhr.object.response);
+          } else {
+            let requestObject = xhr.request ? JSON.parse(JSON.stringify(xhr.request)) : "";
+            let responseObject = xhr.response ? JSON.parse(JSON.stringify(xhr.response)) : "";
+            window.Cypress.autoMocker.recordTransformedObject(xhr, requestObject, responseObject);
+          }
+        };
+      })();
+    },
+    autoMockRequestCommand: (request) => {
+      let localRequest = request;
+      localRequest.method = `REQUEST.${localRequest.method}`;
+      let key = getApiKey(request);
+      let mock = null;
+      if (apiKeyToMocks.hasOwnProperty(key)) {
+        const apiCount = apiKeyToCallCounts[key]++;
+        if (apiCount < apiKeyToMocks[key].length) {
+          mock = apiKeyToMocks[key][apiCount];
         }
-        prepareOnLoadHandler(request);
+      }
+      if (mock) {
+        console.log("MOCKING: " + getApiKey(request))
+        return JSON.parse(mock.data);
+      };
+      return false;
+    },
+    autoMockResponse: (request) => {
+      let key = getApiKey(request);
+      let mock = null;
+      if (apiKeyToMocks.hasOwnProperty(key)) {
+        const apiCount = apiKeyToCallCounts[key]++;
+        if (apiCount < apiKeyToMocks[key].length) {
+          mock = apiKeyToMocks[key][apiCount];
+        }
+      }
+      if (currentOptions.resolveMockFunc) {
+        mock = currentOptions.resolveMockFunc(request, mockArray, mock);
+      }
+      // this header gets called to parse the header from mock into key, value object.
+      // let headers = (completeMatch, keyword, data) => {
+      //   // get the raw header string
+      //   let headers = mock.responseHeaders;
+      //
+      //   // convert the header string into an array of individual headers
+      //   let arr = headers.trim().split(/[\r\n]+/);
+      //
+      //   // create a map of header names to values
+      //   let headerMap = {};
+      //   arr.forEach(line => {
+      //     let parts = line.split(': ');
+      //     let header = parts.shift();
+      //     headerMap[header] = parts.join(': ');
+      //   });
+      //   return headerMap;
+      // }
+      if (mock) {
+        console.log("MOCKING " + getApiKey(request));
+        return {
+          status: mock.status,
+          statusText: mock.statusText,
+          response: JSON.stringify(mock.response),
+          // headers: headers,
+          responseHeaders: mock.responseHeaders
+        };
+      };
+      return false;
+    },
+    mockResponse: request => {
+      if (automocker.isMocking) {
+        let ret = window.Cypress.autoMocker.autoMockResponse(request);
+        if (ret !== false) {
+          return ret;
+        }
+      } else if (automocker.isRecording) {
+        window.Cypress.autoMocker.prepareOnLoadHandler(request);
       }
       if (automocker.isMocking) {
         console.log(
-          "MOCKING ON, but letting this fall through: " + request.url
+          "MOCKING ON, but letting this fall through cause it could not find a match: " + getApiKey(request)
         );
       }
       ++pendingApiCount;
@@ -279,6 +323,8 @@ function registerAutoMockCommands() {
     });
 
     console.log("USING MOCK SERVER");
+    console.log("MOCK DIRECTORY");
+    console.log(apiKeyToMocks);
   }
 
   function setOptions(options) {
@@ -298,9 +344,15 @@ function registerAutoMockCommands() {
     return options;
   }
 
+  /**
+   * Construct the api key that is used to match.  If the method is GET or HEAD, include the url params.
+   *
+   * @param api
+   * @returns {string}
+   */
   function getApiKey(api) {
     let path = api.path;
-    if (api.query && api.method === "GET") {
+    if (api.query && ["GET", "HEAD"].includes(api.method)) {
       path = path + "?" + api.query;
     }
     if (api.url) {
@@ -316,7 +368,6 @@ function registerAutoMockCommands() {
 
   // (c) Steven Levithan <stevenlevithan.com>
   // MIT License
-
   function parseUri(str) {
     var o = parseUri.options,
       m = o.parser[o.strictMode ? "strict" : "loose"].exec(str),

@@ -25,6 +25,7 @@ interface IMockEntry {
   status: number;
   statusText: string;
   contentType: string;
+  responseHeaders: string;
 }
 
 type automock = (filename: string, options?: {
