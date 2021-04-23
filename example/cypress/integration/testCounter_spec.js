@@ -92,5 +92,4 @@ describe('test', function () {
     cy.get('[data-test=button-test-post-with-error]').click();
     cy.get('[data-test=result-text]').contains('402');
   });
-
 })

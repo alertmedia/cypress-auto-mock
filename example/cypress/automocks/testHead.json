@@ -1,0 +1,13 @@
+[
+  {
+    "method": "HEAD",
+    "path": "/counter",
+    "query": "",
+    "request": "",
+    "response": "",
+    "status": 200,
+    "statusText": "OK",
+    "contentType": null,
+    "responseHeaders": "connection: keep-alive\r\ncounter: 0\r\ndate: Fri, 26 Mar 2021 22:33:27 GMT\r\nx-powered-by: Express\r\n"
+  }
+]

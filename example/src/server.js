@@ -1,22 +1,28 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import Counter from './components/Counter';
+import HeadPage from "./components/HeadPage";
 import express from 'express';
 import url from 'url';
 
 let app = express();
 
 // Set the view engine to ejs
+// `views`, the directory where the template files are located
 app.set('view engine', 'ejs');
 
 // Serve static files from the 'public' folder
 app.use(express.static('public'));
 
+// Log Middleware
+app.use((req, res, next) => {
+  console.log(`Time: ${new Date(Date.now()).toLocaleString()}, Request Type: ${req.method}, Request URL: ${req.url}`);
+  next();
+})
+
 // GET /
 app.get('/', function (req, res) {
-  res.render('layout', {
-    content: ReactDOMServer.renderToString(<Counter />)
-  });
+  res.render('layout', {});
 });
 
 // Start server
@@ -32,6 +38,11 @@ let server = app.listen(1337, function () {
 });
 
 var counter = 0;
+
+app.head('/counter', function (req, res) {
+  res.set('Counter', counter)
+  res.end();
+})
 
 app.get('/counter', function (req, res) {
   res.send('' + counter);
